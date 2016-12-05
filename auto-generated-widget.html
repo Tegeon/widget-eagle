@@ -693,7 +693,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 console.log("evt:", evt);
                 that.cannulaDiameter = evt.currentTarget.valueAsNumber;
             });
-            el.find('.axis-skew2').change(function(evt) {
+            el.find('.axis-skew').change(function(evt) {
                 console.log("evt:", evt);
                 that.axisSkew = evt.currentTarget.valueAsNumber;
             });
