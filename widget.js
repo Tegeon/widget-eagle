@@ -1002,7 +1002,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             result += "G00 Z" + this.clearanceHeight + "\n";
             // Go to outside from circle
             //result += "G00 X" + (x - gdiameter) + " Y" + y + "\n";
-            result += "G00 X" + ((x - gdiameter) + (y * axisSkew)) + " Y" + y + "\n";
+            result += "G00 X" + ((x + (y * axisSkew)) - gdiameter) + " Y" + y + "\n";
             // check passes            
             for(var i=0; i<this.stepDownPasses;i++){
                var deep = passesDeep*(i+1);
