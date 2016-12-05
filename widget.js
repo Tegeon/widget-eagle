@@ -1222,7 +1222,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             // move to first position of path
             if (this.clipperDimension[0] !== undefined)
                 //g += "G0 X" + this.clipperDimension[0].X + " Y" + this.clipperDimension[0].Y + "\n";
-                g += "G0 X" + (this.clipperDimension[0].X + ((this.clipperDimension[0].Y) * axisSkew)) + " Y" + this.clipperDimension[0].Y + "\n";
+                g += "G0 X" + (this.clipperDimension[0].X + (this.clipperDimension[0].Y * axisSkew)) + " Y" + this.clipperDimension[0].Y + "\n";
+
             // move down
             g += "G0 Z0\n";
             var newZ = 0;
