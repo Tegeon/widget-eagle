@@ -568,6 +568,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 console.log("evt:", evt);
                 that.cannulaDiameter = evt.currentTarget.valueAsNumber;
             });
+            el.find('.axis-skew').change(function(evt) {
+                console.log("evt:", evt);
+                that.axisSkew = evt.currentTarget.valueAsNumber;
+            });
         },
         calcPasses: function(el) {
             // calc passes
@@ -985,6 +989,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         stepDownDimensions: -0.5,
         stepDownPasses: 3, // use passes or dimension
         spindleRPM: 12000, // spindle rotation speed (rpm)
+        axisSkew: 0, // X-Y axis skew
+        
         generateGcodeHole:function(diameter, x, y){
             var radius = diameter/2;
             var gdiameter = radius-(this.millDiameter/2); // inside milling 
@@ -995,7 +1001,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             // Lift off
             result += "G00 Z" + this.clearanceHeight + "\n";
             // Go to outside from circle
-            result += "G00 X" + (x - gdiameter) + " Y" + y + "\n";
+            //result += "G00 X" + (x - gdiameter) + " Y" + y + "\n";
+            result += "G00 X" + ((x - gdiameter) + (y * axisSkew)) + " Y" + y + "\n";
             // check passes            
             for(var i=0; i<this.stepDownPasses;i++){
                var deep = passesDeep*(i+1);
@@ -1025,21 +1032,26 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 // move to clearance
                 g += "G0 Z" + this.clearanceHeight + "\n";
                 // move to first position of path
-                g += "G0 X" + path[0].X + " Y" + path[0].Y + "\n";
+                //g += "G0 X" + path[0].X + " Y" + path[0].Y + "\n";
+                g += "G0 X" + (path[0].X + (path[0].Y * axisSkew)) + " Y" + path[0].Y + "\n";
                 // move down
                 g += "G0 Z0\n";
                 g += "G1 Z" + this.depthOfSignalMilling + " F" + this.feedRatePlunge + "\n";
                 g += "F" + this.feedRateSignals + "\n";
                 for (var i = 1; i < path.length; i++) {
                     var pt = path[i];
-                    g += "G1 X" + pt.X + " Y" + pt.Y + "\n";
+                    //g += "G1 X" + pt.X + " Y" + pt.Y + "\n";
+                    g += "G1 X" + (pt.X + (pt.Y * axisSkew)) + " Y" + pt.Y + "\n";
                 }
                 // move to first point
-                g += "G1 X" + path[0].X + " Y" + path[0].Y + "\n";
+                //g += "G1 X" + path[0].X + " Y" + path[0].Y + "\n";
+                g += "G1 X" + (path[0].X + (path[0].Y * axisSkew))+ " Y" + path[0].Y + "\n";
                 // just to be safe, move to 2nd point to ensure all copper milled out
                 // but make sure we go at least 2mm, but no more
-                var v1 = new THREE.Vector3(path[0].X, path[0].Y);
-                var v2 = new THREE.Vector3(path[1].X, path[1].Y);
+                //var v1 = new THREE.Vector3(path[0].X, path[0].Y);
+                var v1 = new THREE.Vector3((path[0].X + (path[0].Y * axisSkew)), path[0].Y);
+                //var v2 = new THREE.Vector3(path[1].X, path[1].Y);
+                var v2 = new THREE.Vector3((path[1].X + (path[1].Y * axisSkew)), path[1].Y);
                 var dist = v1.distanceTo(v2);
                 if (dist > 2) {
                     // shorten it
@@ -1052,7 +1064,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 g += "G1 X" + v2.x + " Y" + v2.y + "\n";
                 if (dist < 2) {
                     // go to 3rd point as well
-                    g += "G1 X" + path[2].X + " Y" + path[2].Y + "\n";
+                    //g += "G1 X" + path[2].X + " Y" + path[2].Y + "\n";
+                    g += "G1 X" + (path[2].X + (path[2].Y * axisSkew))+ " Y" + path[2].Y + "\n";
                 }
                 
                 // done with signal, go to z clearance
@@ -1074,7 +1087,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             for ( diameter in this.sortObjByKey(this.drillVias) ){
                 this.drillVias[diameter].forEach(function(dvector){
                      g += "G0 Z" + that.clearanceHeight + "\n";
-                     g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
+                     //g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
+                     g += "G0 X" + (dvector.X + (dvector.Y * axisSkew)) + " Y" + dvector.Y   + "\n";
                      g += "G0 Z0.1\n";
                      g += "G1 Z" + that.depthOfSignalMilling  + "\n";
                 });
@@ -1094,7 +1108,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             for ( diameter in this.sortObjByKey(this.drillPads) ){
                this.drillPads[diameter].forEach(function(dvector){
                      g += "G0 Z" + that.clearanceHeight + "\n";
-                     g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
+                     //g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
+                     g += "G0 X" + (dvector.X + (dvector.Y * axisSkew)) + " Y" + dvector.Y   + "\n";
                      g += "G0 Z0.1\n";
                      g += "G1 Z" + that.depthOfSignalMilling  + "\n";
                 });
@@ -1118,7 +1133,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                g += "F" + this.drillFeedrate + "\n"; 
                this.drillVias[diameter].forEach(function(dvector){
                      g += "G0 Z" + that.clearanceHeight + "\n";
-                     g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
+                     //g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
+                     g += "G0 X" + (dvector.X + (dvector.Y * axisSkew)) + " Y" + dvector.Y   + "\n";
                      g += "G0 Z" + that.clearanceHeight/10 + "\n";
                      g += "G1 Z" + that.drillDepth  + "\n";
                 });
@@ -1144,7 +1160,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                g += "F" + this.drillFeedrate + "\n"; 
                this.drillPads[diameter].forEach(function(dvector){
                      g += "G0 Z" + that.clearanceHeight + "\n";
-                     g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
+                     //g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
+                     g += "G0 X" + (dvector.X + (dvector.Y * axisSkew)) + " Y" + dvector.Y   + "\n";
                      g += "G0 Z" + that.clearanceHeight/10 + "\n";
                      g += "G1 Z" + that.drillDepth  + "\n";
                 });
@@ -1172,7 +1189,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 // only holes bigger as max diameter
                 if (diameter < that.drillMaxDiameter) continue;
                 this.drillPads[diameter].forEach(function(dvector) {
-                    g += that.generateGcodeHole(diameter, dvector.X, dvector.Y)
+                    //g += that.generateGcodeHole(diameter, dvector.X, dvector.Y)
+                    g += that.generateGcodeHole(diameter, (dvector.X + (dvector.Y * axisSkew)), dvector.Y)
                 });
             }
 
@@ -1203,7 +1221,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             g += "(dimensions)\n";
             // move to first position of path
             if (this.clipperDimension[0] !== undefined)
-                g += "G0 X" + this.clipperDimension[0].X + " Y" + this.clipperDimension[0].Y + "\n";
+                //g += "G0 X" + this.clipperDimension[0].X + " Y" + this.clipperDimension[0].Y + "\n";
+                g += "G0 X" + (this.clipperDimension[0].X + ((this.clipperDimension[0].Y) * axisSkew)) + " Y" + this.clipperDimension[0].Y + "\n";
             // move down
             g += "G0 Z0\n";
             var newZ = 0;
@@ -1229,7 +1248,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         //console.log("dimension mill: skipping pt:", pt);
                     } else {
                         //console.log("dimension mill: adding pt:", pt);
-                        g += "G1 X" + pt.X + " Y" + pt.Y + "\n";
+                        //g += "G1 X" + pt.X + " Y" + pt.Y + "\n";
+                        g += "G1 X" + (pt.X + (pt.Y * axisSkew)) + " Y" + pt.Y + "\n";
                     }
                     lastPt = pt;
                 });

@@ -256,6 +256,14 @@
                     <p class="descriptive-text">The clearance height to move the Z axis to for moving from trace to trace without hitting anything. Default is 1mm, but if you are using the Auto-Level you could get away with 0.5mm.
                     </p>
 
+                    <h2>Axis skew</h2> Axis skew in mm (if your X and Y axis are not perfectly perpendicular)
+                    <div class="input-group">
+                        <input class="form-control axis-skew" type="number" placeholder="Clearance" value="0" />
+                        <div class="input-group-addon">mm</div>
+                    </div>
+                    <p class="descriptive-text">The value of axis skew to compensate X/Y axis perpendicularity in your machine [skew distance/1 mm]. This is best to measure it with at Y=0 and Y=max and then calculate: axisSkew = SkewAtYmax/Ymax. Try to align your machine first, but if you are unable to do it use the value to correct your axis. Leave 0 if your machine axis are perpendicular. Attention: the values of X and Y will show real machine coordinates (including skew) and not the values of your gcode file.
+                    </p>
+                    
 
                     <!--  ----------------------- DRILLING ------------------------>
                     <div class="panel eagle-advanced" style="margin-bottom:10px;">
